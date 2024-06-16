@@ -1,6 +1,11 @@
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.utilities import SQLDatabase
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from langchain_groq import ChatGroq
 import streamlit as st 
 
 
@@ -31,10 +36,57 @@ def get_sql_chain(db):
     SQL Query:
     """
     
+    prompt = ChatPromptTemplate.from_template(template)
+    
+    # llm = ChatGoogleGenerativeAI(model="gemini-pro")
+    # llm = ChatGroq(model ="Llama3-8b-8192",temperature=0)
+    
+    llm = ChatGroq(model ="Mixtral-8x7b-32768",temperature=0)
+    
+    def get_schema(_):
+        return db.get_table_info()
+
+    return (
+        RunnablePassthrough.assign(schema=get_schema)
+        | prompt
+        | llm.bind(stop=["\nSQL Result:"])
+        | StrOutputParser()
+    )
+
+def get_response(user_query, db, chat_history):
+    sql_chain = get_sql_chain(db)
+    
+    template = """
+    You are a data analyst at a comapny. You are interacting with a user who is asking your question about the company's database.
+    Based on the table schema below, question, sql query, and sql response, write a natural langauga response.
+    <SCHEMA>{schema}</SCHEMA>
+    
+    Conversational History: {chat_history}
+    SQL Query: <SQL>{query}</SQL>
+    User Question: {question}
+    SQL Response {response}
+    """
+    
+    prompt = ChatPromptTemplate.from_template(template)
+    
+    # llm = ChatGoogleGenerativeAI(model="gemini-pro")
+    llm = ChatGroq(model ="Mixtral-8x7b-32768",temperature=0)
+    # llm = ChatGroq(model ="Llama3-8b-8192",temperature=0)
+    
+    chain = (
+        RunnablePassthrough.assign(query=sql_chain).assign(
+            schema=lambda _: db.get_table_info(),
+            response=lambda vars: db.run(vars["query"]) 
+        )
+        | prompt
+        | llm.bind(stop=["\nSQL Result:"])
+        | StrOutputParser()
+    )
+    return chain.stream({"question":user_query, "chat_history": chat_history})
     
 
 if  "chat_history" not in st.session_state:
-    st.session_state["chat_history"] = [
+    st.session_state.chat_history = [
         AIMessage("Hello! I am a SQL Assistant. How can I help you?, Ask me anything, about your database...."),    
     ]
 
@@ -83,6 +135,6 @@ if user_query is not None and user_query.strip() != "":
         st.markdown(user_query)
     
     with st.chat_message("AI"):
-        response = "I don't know how to response to that...."
-        st.markdown(response)
-        st.session_state.chat_history.append(AIMessage(content=response))
+        ai_response = st.write_stream(get_response(user_query,st.session_state.db, st.session_state.chat_history))
+    
+    st.session_state.chat_history.append(AIMessage(content=ai_response))
