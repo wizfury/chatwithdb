@@ -9,6 +9,8 @@ from langchain_groq import ChatGroq
 import streamlit as st 
 
 
+
+
 def init_db(user,password,host,port,database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
     return SQLDatabase.from_uri(db_uri)
