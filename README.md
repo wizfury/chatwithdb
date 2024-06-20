@@ -10,7 +10,7 @@ I've,
 
 - Developed a SQL chain to generate queries from user input.
 
-- Enhanced user experience by integrating advanced AI tools to simplify database access.
+- Enhanced the chatbot’s natural language understanding and response accuracy using Mistral AI.
 
 ## Working diagram
 ![Untitled drawing (1)](https://github.com/wizfury/chatwithdb/assets/68225960/ef8216d6-4a65-4bad-bafb-206476b0c3aa)
