@@ -1,7 +1,7 @@
-langchain_community==0.2.9
-langchain_core==0.2.7
-langchain_google_genai==1.0.6
-langchain_groq==0.1.5
+langchain_community
+langchain_core
+langchain_google_genai
+langchain_groq
 python-dotenv==1.0.1
 streamlit==1.35.0
 mysql-connector-python==8.4.0
