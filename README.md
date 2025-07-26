@@ -1,8 +1,7 @@
 
 
 # ChatDB
-An interactive chatbot to query MySQL databases through natural language. It uses an SQL chain that translates user queries into SQL commands, making database interactions more intuitive and efficient.
-
+To improve data accessibility for non-technical business users who lacked SQL knowledge, the objective was to create a system for querying a MySQL database using natural language commands. (Action) An interactive chatbot was engineered using Python, LangChain, and the OpenAI API, featuring custom-developed SQL chains and LangChain wrappers to convert user inputs into efficient SQL queries accurately. (Result) This solution effectively eliminates the need for manual SQL query writing for common requests, significantly enhancing data accessibility and reducing data retrieval time for business teams.
 ## Key highlights:
 
 I've,
